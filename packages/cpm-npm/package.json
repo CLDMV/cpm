@@ -1,0 +1,12 @@
+{
+	"name": "cpm-npm",
+	"version": "1.0.0",
+	"main": "index.js",
+	"type": "module",
+	"exports": {
+		".": "./index.js"
+	},
+	"description": "NPM provider for cpm CLI",
+	"author": "",
+	"license": "MIT"
+}
