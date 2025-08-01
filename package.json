@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@inquirer/prompts": "^3.3.2",
 		"chalk": "^5.4.1",
-		"yargs": "^18.0.0"
+		"cliffy": "^2.5.1",
+		"commander": "^14.0.0"
 	}
 }
