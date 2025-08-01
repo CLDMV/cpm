@@ -1,0 +1,15 @@
+{
+	"name": "cpm-github-npm",
+	"version": "1.0.0",
+	"main": "index.js",
+	"description": "GitHub npm registry provider for cpm. See index.js for endpoint notes.",
+	"keywords": [
+		"cpm",
+		"provider",
+		"github",
+		"npm",
+		"registry"
+	],
+	"author": "",
+	"license": "MIT"
+}
