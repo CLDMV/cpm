@@ -18,34 +18,53 @@ program
 
 await gatherCommands(program);
 
-// Listen for terminal resize and re-output help if in interactive terminal
-if (process.stdout.isTTY) {
-	let lastColumns = process.stdout.columns;
-	process.stdout.on("resize", () => {
-		// Only re-output help if columns actually changed
-		if (process.stdout.columns !== lastColumns) {
-			lastColumns = process.stdout.columns;
-			// Only re-output help if no subcommand is running (i.e. just showing help)
-			// This is a simple heuristic: if no extra args, show help again
-			if (process.argv.length <= 2 || (process.argv[2] === "help" && process.argv.length <= 3)) {
-				// Clear the terminal for a cleaner re-render
-				process.stdout.write("\x1Bc");
-				program.outputHelp();
-			}
-		}
-	});
-}
-
 // Show global help if no arguments are provided (idiomatic Commander way)
 program.action(() => {
 	program.outputHelp();
 	process.exit(0);
 });
 
+/**
+ * Global uncaught exception handler for the CLI.
+ * Prints error objects with all properties for debugging, including non-enumerable and symbol properties.
+ * Intercepts prompt force-close errors (even if not instanceof Error) and exits cleanly.
+ * @param {any} error - The uncaught exception.
+ */
+process.on("uncaughtException", (error) => {
+	// Intercept ExitPromptError (inquirer) and similar prompt force-close errors
+	if (
+		(error instanceof Error && error.name === "ExitPromptError") ||
+		(error && typeof error === "object" && typeof error.message === "string" && error.message.includes("User force closed the prompt"))
+	) {
+		console.log("👋 until next time!");
+		process.exit(0);
+	} else {
+		/* 
+		console.log("error object (util.inspect):");
+		console.log(util.inspect(error, { showHidden: true, depth: null, colors: true }));
+		// Print all own properties, including non-enumerable and symbol properties
+		const allProps = {};
+		if (error && typeof error === "object") {
+			for (const key of Reflect.ownKeys(error)) {
+				allProps[key] = error[key];
+			}
+			console.log("error own properties:", util.inspect(allProps, { showHidden: true, depth: null, colors: true }));
+		}
+		console.log("typeof error: ", typeof error);
+		*/
+		// Rethrow unknown errors
+		throw error;
+	}
+});
+
 try {
 	program.parse(process.argv);
 } catch (err) {
-	// console.log("try/catch error: ", err);
+	// Global handler for inquirer prompt force-close (Ctrl+C, window close, etc.)
+	if (err && err.message && err.message.includes("User force closed the prompt")) {
+		console.log("\n[!] Exiting.");
+		process.exit(0);
+	}
 	if (err.code === "commander.missingArgument" || err.code === "commander.unknownOption" || err.code === "commander.unknownCommand") {
 		let helpShown = false;
 		if (err.command && typeof err.command.outputHelp === "function") {
